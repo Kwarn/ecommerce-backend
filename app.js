@@ -11,6 +11,9 @@ const graphqlResolver = require('./graphql/resolvers');
 const auth = require('./middleware/auth');
 const errorHandler = require('./util/errorHandler');
 const cors = require('cors');
+const s3Functions = require('./aws/s3');
+const multerS3 = require('multer-s3');
+const fileUploadRoute = require('./aws/s3')
 
 dotenv.config();
 const corsOptions = {
@@ -19,41 +22,12 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-console.log(corsOptions);
 const app = express();
 
 const clearImage = filePath => {
   filePath = path.join(__dirname, filePath);
   fs.unlink(filePath, err => console.log(err));
 };
-
-const fileStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'images');
-  },
-  filename: (req, file, cb) => {
-    cb(null, new Date().toISOString() + '-' + file.originalname);
-  },
-});
-
-const fileFilter = (req, file, cb) => {
-  if (
-    file.mimetype == 'image/png' ||
-    file.mimetype == 'image/jpg' ||
-    file.mimetype == 'image/jpeg'
-  ) {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-};
-
-app.use(
-  multer({
-    storage: fileStorage,
-    fileFilter: fileFilter,
-  }).single('image')
-);
 
 const accessLogStream = fs.createWriteStream(
   path.join(__dirname, 'access.log'),
@@ -64,36 +38,10 @@ app.use(morgan('combined', { stream: accessLogStream }));
 app.use(express.json());
 
 app.use(cors(corsOptions));
-app.use((req, res, next) => {
-  // res.setHeader('Access-Control-Allow-Origin', '*');
-  // res.setHeader(
-  //   'Access-Control-Allow-Methods',
-  //   'GET, POST, PUT, PATCH, DELETE'
-  // );
-  // res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  // if (req.method === 'OPTIONS') {
-  //   // graphql rejects non POST requests, this skips the 'OPTIONS' request.
-  //   return res.sendStatus(200);
-  // }
-  next();
-});
 
-app.use('/images', express.static(path.join(__dirname, 'images')));
+// app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(auth);
-app.put('/post-image', (req, res, next) => {
-  if (!req.isAuth) {
-    throw errorHandler('Not authorized', 401);
-  }
-  if (!req.file) {
-    return res.status(200).json({ message: 'No file provided.' });
-  }
-  if (req.body.oldPath) {
-    clearImage(req.body.oldPath);
-  }
-  return res
-    .status(201)
-    .json({ message: 'File uploaded', filePath: req.file.path });
-});
+app.use(fileUploadRoute)
 
 app.use(
   '/graphql',
