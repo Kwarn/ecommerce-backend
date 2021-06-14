@@ -51,8 +51,6 @@ const upload = multer({ storage: storage, fileFilter: fileFilter }).single(
   'file'
 );
 
-const createParams = async files => {};
-
 router.post('/post-images', multipleUpload, async function (req, res, next) {
   const resData = [];
 
@@ -67,13 +65,17 @@ router.post('/post-images', multipleUpload, async function (req, res, next) {
       resData.push(uploaded.Location);
 
       if (resData.length === req.files.length) {
-        res.status(202).json({
+        res.status(200).json({
           error: false,
-          body: resData,
+          imageUrls: resData,
         });
       }
     } catch (err) {
       console.log(`err`, err);
+      res.status(500).json({
+        error: true,
+        message: 'Server error when uploading files.',
+      });
     }
   }
 });
