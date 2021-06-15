@@ -6,7 +6,7 @@ const validator = require('validator').default;
 const jwt = require('jsonwebtoken');
 
 // returns an array of error objects or false if all product data validation passes.
-const getPostValidationErrors = (title, description, imageUrls) => {
+const getProductValidationErrors = (title, imageUrls, description) => {
   const errors = [];
   if (validator.isEmpty(title) || !validator.isLength(title, { min: 5 })) {
     errors.push({ message: 'Invalid title.' });
@@ -94,15 +94,17 @@ module.exports = {
     return { token: token, userId: user._id.toString() };
   },
   createProduct: async function (
-    { productInput: { title, description, imageUrls } },
+    { productInput: { title, imageUrls, description } },
     req
   ) {
+    // console.log('REQUEST OBJ', req);
+    console.log('title,ImgUrls, desc: ', title, imageUrls, description);
     if (!req.userId) throw errorHandler('Not authenticated.', 401);
 
-    const validationErrors = getPostValidationErrors(
+    const validationErrors = getProductValidationErrors(
       title,
-      description,
-      imageUrls
+      imageUrls,
+      description
     );
     if (validationErrors)
       throw errorHandler(
@@ -118,8 +120,8 @@ module.exports = {
     }
     const product = new Product({
       title: title,
-      description: description,
       imageUrls: imageUrls,
+      description: description,
       creator: user,
     });
     const createdProduct = await product.save();
@@ -138,7 +140,7 @@ module.exports = {
   ) {
     if (!req.userId) throw errorHandler('Not authenticated.', 401);
 
-    const validationErrors = getPostValidationErrors(
+    const validationErrors = getProductValidationErrors(
       title,
       description,
       imageUrls

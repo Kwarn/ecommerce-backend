@@ -30,7 +30,7 @@ module.exports = buildSchema(`
   }
   input ProductInputData {
     title: String!
-    imageUrls: [String!]
+    imageUrls: [String!]!
     description: String!
   }
   input UserInputData {
