@@ -6,10 +6,18 @@ const validator = require('validator').default;
 const jwt = require('jsonwebtoken');
 
 // returns an array of error objects or false if all product data validation passes.
-const getProductValidationErrors = (title, imageUrls, description) => {
+const getProductValidationErrors = (
+  title,
+  imageUrls,
+  description,
+  productType
+) => {
   const errors = [];
   if (validator.isEmpty(title) || !validator.isLength(title, { min: 5 })) {
     errors.push({ message: 'Invalid title.' });
+  }
+  if (validator.isEmpty(productType)) {
+    errors.push({ message: 'Invalid productType.' });
   }
   if (
     validator.isEmpty(description) ||
@@ -94,17 +102,17 @@ module.exports = {
     return { token: token, userId: user._id.toString() };
   },
   createProduct: async function (
-    { productInput: { title, imageUrls, description } },
+    { productInput: { title, imageUrls, description, productType } },
     req
   ) {
     // console.log('REQUEST OBJ', req);
-    console.log('title,ImgUrls, desc: ', title, imageUrls, description);
     if (!req.userId) throw errorHandler('Not authenticated.', 401);
 
     const validationErrors = getProductValidationErrors(
       title,
       imageUrls,
-      description
+      description,
+      productType
     );
     if (validationErrors)
       throw errorHandler(
@@ -122,6 +130,7 @@ module.exports = {
       title: title,
       imageUrls: imageUrls,
       description: description,
+      productType: productType,
       creator: user,
     });
     const createdProduct = await product.save();
@@ -191,20 +200,23 @@ module.exports = {
       productId: productId,
     };
   },
-  getPosts: async function ({ page }, req) {
+  getProducts: async function ({ productType }, req) {
     if (!req.userId) {
       throw errorHandler('Not Authenticated.', 401);
     }
-    if (!page) {
-      page = 1;
-    }
-    const perPage = 2;
+    // if (!page) {
+    //   page = 1;
+    // }
+    // const perPage = 2;
+    console.log(`productType`, productType);
     const totalProducts = await Product.find().countDocuments();
-    const products = await Product.find()
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * perPage)
-      .limit(perPage)
-      .populate('creator');
+    const products = await Product.find({ productType: productType });
+    // const products = await Product.find()
+    //   .sort({ createdAt: -1 })
+    //   .skip((page - 1) * perPage)
+    //   .limit(perPage)
+    //   .populate('creator');
+    console.log(`products`, products)
 
     return {
       products: products.map(p => {

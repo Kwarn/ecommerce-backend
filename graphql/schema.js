@@ -6,6 +6,7 @@ module.exports = buildSchema(`
     title: String!
     imageUrls: [String!]
     description: String!
+    productType: String!
     creator: User!
     createdAt: String!
     updatedAt: String!
@@ -32,6 +33,7 @@ module.exports = buildSchema(`
     title: String!
     imageUrls: [String!]!
     description: String!
+    productType: String!
   }
   input UserInputData {
     email: String!
@@ -40,7 +42,7 @@ module.exports = buildSchema(`
   }
   type RootQuery {
     login(email: String!, password: String!): AuthData!
-    getProducts(page: Int!): ProductData!
+    getProducts(productType: String!): ProductData!
     getProduct(productId: ID!): Product!
   }
   type RootMutation {
