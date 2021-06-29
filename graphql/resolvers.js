@@ -105,7 +105,6 @@ module.exports = {
     { productInput: { title, imageUrls, description, productType } },
     req
   ) {
-    // console.log('REQUEST OBJ', req);
     if (!req.userId) throw errorHandler('Not authenticated.', 401);
 
     const validationErrors = getProductValidationErrors(
@@ -143,7 +142,7 @@ module.exports = {
       updatedAt: createdProduct.updatedAt.toISOString(),
     };
   },
-  updatedProduct: async function (
+  updateProduct: async function (
     { productId, productInput: { title, description, imageUrls } },
     req
   ) {
@@ -201,22 +200,14 @@ module.exports = {
     };
   },
   getProducts: async function ({ productType }, req) {
-    if (!req.userId) {
-      throw errorHandler('Not Authenticated.', 401);
-    }
-    // if (!page) {
-    //   page = 1;
-    // }
-    // const perPage = 2;
-    console.log(`productType`, productType);
     const totalProducts = await Product.find().countDocuments();
-    const products = await Product.find({ productType: productType });
-    // const products = await Product.find()
-    //   .sort({ createdAt: -1 })
-    //   .skip((page - 1) * perPage)
-    //   .limit(perPage)
-    //   .populate('creator');
-    console.log(`products`, products)
+
+    let products;
+    if (productType === 'all') {
+      products = await Product.find();
+    } else {
+      products = await Product.find({ productType: productType });
+    }
 
     return {
       products: products.map(p => {
@@ -245,30 +236,4 @@ module.exports = {
       updatedAt: product.updatedAt.toISOString(),
     };
   },
-  // getStatus: async function (args, req) {
-  //   if (!req.userId) {
-  //     throw errorHandler('Not Authenticated.', 401);
-  //   }
-  //   const user = await User.findById(req.userId);
-  //   if (!user) {
-  //     throw errorHandler('No user with that ID found.', 404);
-  //   }
-  //   return {
-  //     status: user.status,
-  //   };
-  // },
-  // updateStatus: async function ({ statusInput: { status } }, req) {
-  //   if (!req.userId) {
-  //     throw errorHandler('Not Authenticated.', 401);
-  //   }
-  //   const user = await User.findById(req.userId);
-  //   if (!user) {
-  //     throw errorHandler('No user with that ID found.');
-  //   }
-  //   user.status = status;
-  //   const savedUser = await user.save();
-  //   return {
-  //     status: savedUser.status,
-  //   };
-  // },
 };
