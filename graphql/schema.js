@@ -1,4 +1,4 @@
-const { buildSchema } = require('graphql');
+const { buildSchema } = require("graphql");
 
 module.exports = buildSchema(`
   type Product {
@@ -50,6 +50,7 @@ module.exports = buildSchema(`
     createProduct(productInput: ProductInputData): Product!
     deleteProduct(productId: ID!): DeleteProductId!
     updateProduct(productId: ID!, productInput: ProductInputData): Product!
+    cleanupHelper(productIdArray: [ID!]): [ID!]!
   }
   schema {
     query: RootQuery

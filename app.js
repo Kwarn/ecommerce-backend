@@ -1,19 +1,19 @@
-const dotenv = require('dotenv');
-const morgan = require('morgan');
-const express = require('express');
-const { graphqlHTTP } = require('express-graphql');
-const mongoose = require('mongoose');
-const path = require('path');
-const fs = require('fs');
-const multer = require('multer');
-const graphqlSchema = require('./graphql/schema');
-const graphqlResolver = require('./graphql/resolvers');
-const auth = require('./middleware/auth');
-const errorHandler = require('./util/errorHandler');
-const cors = require('cors');
-const s3Functions = require('./aws/s3');
-const multerS3 = require('multer-s3');
-const fileUploadRoute = require('./aws/s3')
+const dotenv = require("dotenv");
+const morgan = require("morgan");
+const express = require("express");
+const { graphqlHTTP } = require("express-graphql");
+const mongoose = require("mongoose");
+const path = require("path");
+const fs = require("fs");
+const multer = require("multer");
+const graphqlSchema = require("./graphql/schema");
+const graphqlResolver = require("./graphql/resolvers");
+const auth = require("./middleware/auth");
+const errorHandler = require("./util/errorHandler");
+const cors = require("cors");
+const s3Functions = require("./aws/s3");
+const multerS3 = require("multer-s3");
+const fileUploadRoute = require("./aws/s3");
 
 dotenv.config();
 const corsOptions = {
@@ -24,27 +24,27 @@ const corsOptions = {
 
 const app = express();
 
-const clearImage = filePath => {
+const clearImage = (filePath) => {
   filePath = path.join(__dirname, filePath);
-  fs.unlink(filePath, err => console.log(err));
+  fs.unlink(filePath, (err) => console.log(err));
 };
 
 const accessLogStream = fs.createWriteStream(
-  path.join(__dirname, 'access.log'),
-  { flags: 'a' }
+  path.join(__dirname, "access.log"),
+  { flags: "a" }
 );
 
-app.use(morgan('combined', { stream: accessLogStream }));
+app.use(morgan("combined", { stream: accessLogStream }));
 app.use(express.json());
 
 app.use(cors(corsOptions));
 
 // app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(auth);
-app.use(fileUploadRoute)
+app.use(fileUploadRoute);
 
 app.use(
-  '/graphql',
+  "/graphql",
   graphqlHTTP({
     schema: graphqlSchema,
     rootValue: graphqlResolver,
@@ -54,7 +54,7 @@ app.use(
         return error;
       }
       const data = error.originalError.data;
-      const message = error.message || 'An error occurred.';
+      const message = error.message || "An error occurred.";
       const code = error.originalError.statusCode || 500;
       return { message: message, data: data, status: code };
     },
@@ -75,8 +75,8 @@ mongoose
     useUnifiedTopology: true,
     useFindAndModify: false,
   })
-  .then(result => {
+  .then((result) => {
     app.listen(process.env.PORT);
-    console.log('Server Running.');
+    console.log(`Server Running on PORT: ${process.env.PORT}`);
   })
-  .catch(err => console.log(`Mongoose Connection Error`, err));
+  .catch((err) => console.log(`Mongoose Connection Error`, err));
