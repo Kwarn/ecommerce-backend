@@ -1,12 +1,12 @@
-const fs = require('fs');
-const AWS = require('aws-sdk');
-const S3 = require('aws-sdk/clients/s3');
-const path = require('path');
-const express = require('express');
+const fs = require("fs");
+const AWS = require("aws-sdk");
+const S3 = require("aws-sdk/clients/s3");
+const path = require("path");
+const express = require("express");
 const router = express.Router();
-const multer = require('multer');
+const multer = require("multer");
 
-require('dotenv').config();
+require("dotenv").config();
 const bucketName = process.env.AWS_BUCKET_NAME;
 const region = process.env.AWS_BUCKET_REGION;
 const accessKey = process.env.AWS_ACCESS_KEY;
@@ -26,9 +26,9 @@ const s3bucket = new S3({
 
 const fileFilter = (req, file, cb) => {
   if (
-    file.mimetype == 'image/png' ||
-    file.mimetype == 'image/jpg' ||
-    file.mimetype == 'image/jpeg'
+    file.mimetype == "image/png" ||
+    file.mimetype == "image/jpg" ||
+    file.mimetype == "image/jpeg"
   ) {
     cb(null, true);
   } else {
@@ -38,20 +38,20 @@ const fileFilter = (req, file, cb) => {
 
 const storage = multer.memoryStorage({
   destination: function (req, file, callback) {
-    callback(null, '');
+    callback(null, "");
   },
 });
 
 const multipleUpload = multer({
   storage: storage,
   fileFilter: fileFilter,
-}).array('images');
+}).array("images");
 
 const upload = multer({ storage: storage, fileFilter: fileFilter }).single(
-  'file'
+  "file"
 );
 
-router.post('/post-images', multipleUpload, async function (req, res, next) {
+router.post("/post-images", multipleUpload, async function (req, res, next) {
   const resData = [];
 
   for (const file of req.files) {
@@ -74,7 +74,7 @@ router.post('/post-images', multipleUpload, async function (req, res, next) {
       console.log(`err`, err);
       res.status(500).json({
         error: true,
-        message: 'Server error when uploading files.',
+        message: "Server error when uploading files.",
       });
     }
   }

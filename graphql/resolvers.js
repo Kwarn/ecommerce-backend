@@ -143,19 +143,21 @@ module.exports = {
     };
   },
   updateProduct: async function (
-    { productId, productInput: { title, description, imageUrls } },
+    { productInput: { _id, productType, title, description, imageUrls } },
     req
   ) {
+    console.log(_id, productType, title, description, imageUrls);
     if (!req.userId) throw errorHandler("Not authenticated.", 401);
 
     const validationErrors = getProductValidationErrors(
       title,
+      imageUrls,
       description,
-      imageUrls
+      productType
     );
     if (validationErrors)
       throw errorHandler("Invalid product data.", 422, null, validationErrors);
-    const product = await Product.findById(productId).populate("creator");
+    const product = await Product.findById(_id).populate("creator");
     if (product.creator._id.toString() !== req.userId.toString()) {
       throw errorHandler("You are not authorized to modify this product.", 403);
     }
@@ -163,8 +165,11 @@ module.exports = {
     product.title = title;
     product.description = description;
     if (imageUrls !== "undefined") {
+      // AWS Call here to remove images not in imageUrls but in product.imageUrls
       product.imageUrls = imageUrls;
     }
+    product.productType = productType;
+    console.log(`product`, product);
     const updatedProduct = await product.save();
     return {
       ...updatedProduct._doc,

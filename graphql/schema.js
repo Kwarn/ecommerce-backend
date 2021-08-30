@@ -35,6 +35,13 @@ module.exports = buildSchema(`
     description: String!
     productType: String!
   }
+  input UpdateProductInputData {
+    _id: ID!
+    title: String!
+    imageUrls: [String!]!
+    description: String!
+    productType: String!
+  }
   input UserInputData {
     email: String!
     name: String!
@@ -49,7 +56,7 @@ module.exports = buildSchema(`
     createUser(userInput: UserInputData): User!
     createProduct(productInput: ProductInputData): Product!
     deleteProduct(productId: ID!): DeleteProductId!
-    updateProduct(productId: ID!, productInput: ProductInputData): Product!
+    updateProduct(productInput: UpdateProductInputData): Product!
     cleanupHelper(productIdArray: [ID!]): [ID!]!
   }
   schema {
